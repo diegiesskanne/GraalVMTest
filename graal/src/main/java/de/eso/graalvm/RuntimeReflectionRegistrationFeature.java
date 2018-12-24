@@ -1,0 +1,19 @@
+package de.eso.graalvm;
+
+import com.oracle.svm.core.annotate.AutomaticFeature;
+import org.graalvm.nativeimage.Feature;
+import org.graalvm.nativeimage.RuntimeReflection;
+
+/**
+ * This class must be generated with a Annotation-Processor, which scans all files in the classpath
+ * and searches for certain patterns
+ */
+@AutomaticFeature
+public class RuntimeReflectionRegistrationFeature implements Feature {
+  public void beforeAnalysis(BeforeAnalysisAccess access) {
+    RuntimeReflection.register(MyInterface.class);
+    RuntimeReflection.register(MyClazz.class);
+    RuntimeReflection.registerForReflectiveInstantiation(MyClazz.class);
+    RuntimeReflection.register(MyInterface.class.getDeclaredMethods());
+  }
+}
