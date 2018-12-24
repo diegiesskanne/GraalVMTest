@@ -447,6 +447,7 @@ hs_err_pid*
 ### Eclipse template
 
 .metadata
+*.jar
 bin/
 tmp/
 *.tmp
@@ -498,4 +499,3 @@ local.properties
 .cache-main
 .scala_dependencies
 .worksheet
-
