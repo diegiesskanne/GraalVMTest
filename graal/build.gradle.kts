@@ -1,3 +1,8 @@
+import groovy.lang.Closure
+import net.bytebuddy.build.gradle.AbstractUserConfiguration
+import net.bytebuddy.build.gradle.ByteBuddyExtension
+import net.bytebuddy.build.gradle.Transformation
+
 plugins {
     id("com.palantir.graal") version "0.2.0-13-gb76f6cb"
     application
@@ -17,7 +22,12 @@ repositories {
     mavenCentral()
 }
 
+val examplePlugin by configurations.creating
+
 dependencies {
+    implementation(project(":annotation-api"))
+    implementation(project(":bytebuddy"))
+
     implementation("com.google.code.gson:gson:2.8.5")
     implementation("io.github.classgraph:classgraph:4.6.10")
 
@@ -49,9 +59,9 @@ graal {
     option("-H:DynamicProxyConfigurationFiles=/home/sergej/IdeaProjects/proxies.json")
 }
 
-//byteBuddy {
-//    transformation {
-//        plugin = "com.example.junit.HookInstallingPlugin"
-//        classPath = configurations.examplePlugin
-//    }
-//}
+configure<ByteBuddyExtension> {
+    transformation(closureOf<Transformation> {
+        // setClassPath(configurations.getByName("implementation"))
+        plugin = "de.eso.bytebuddy.HookInstallingPlugin"
+    })
+}

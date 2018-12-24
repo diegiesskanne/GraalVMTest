@@ -1,21 +1,22 @@
-package de.eso.de.eso.bytebuddy;
+package de.eso.bytebuddy;
 
-import de.eso.de.eso.annotation.Bind;
+import de.eso.annotation.Bind;
 import net.bytebuddy.build.Plugin;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.implementation.MethodDelegation;
+import net.bytebuddy.matcher.ElementMatchers;
 
 import java.io.IOException;
 
 import static net.bytebuddy.matcher.ElementMatchers.anyOf;
 import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
 
-public final class HookInstallingPlugin implements Plugin {
+public class HookInstallingPlugin implements Plugin {
   @Override
   public boolean matches(TypeDescription target) {
-    return target.getName().endsWith("Test");
+    return true;
   }
 
   @Override
@@ -24,7 +25,10 @@ public final class HookInstallingPlugin implements Plugin {
       TypeDescription typeDescription,
       ClassFileLocator classFileLocator) {
     return builder
-        .method(isAnnotatedWith(anyOf(Bind.class)))
+        .method(
+            isAnnotatedWith(anyOf(Bind.class)) //
+                .and(ElementMatchers.named("wurst"))
+                .and(ElementMatchers.returns(String.class)))
         .intercept(MethodDelegation.to(SampleInterceptor.class));
   }
 

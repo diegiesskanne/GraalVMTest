@@ -1,4 +1,4 @@
-package de.eso.de.eso.bytebuddy;
+package de.eso.bytebuddy;
 
 import net.bytebuddy.implementation.bind.annotation.Origin;
 
