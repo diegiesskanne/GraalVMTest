@@ -24,6 +24,7 @@ public class HookInstallingPlugin implements Plugin {
       DynamicType.Builder<?> builder,
       TypeDescription typeDescription,
       ClassFileLocator classFileLocator) {
+
     return builder
         .method(
             isAnnotatedWith(anyOf(Bind.class)) //
@@ -33,5 +34,7 @@ public class HookInstallingPlugin implements Plugin {
   }
 
   @Override
-  public void close() throws IOException {}
+  public void close() throws IOException {
+    System.out.println("CLOSE");
+  }
 }

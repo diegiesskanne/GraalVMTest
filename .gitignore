@@ -4,6 +4,7 @@ g# Created by .ignore support plugin (hsz.mobi)
 
 # IntelliJ project files
 .idea
+*.ipr
 *.iml
 out
 gen### Gradle template
@@ -434,7 +435,7 @@ ASALocalRun/
 .mtj.tmp/
 
 # Package Files #
-# *.jar
+*.jar
 *.war
 *.nar
 *.ear
@@ -447,7 +448,6 @@ hs_err_pid*
 ### Eclipse template
 
 .metadata
-*.jar
 bin/
 tmp/
 *.tmp

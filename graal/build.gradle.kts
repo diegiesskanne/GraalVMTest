@@ -34,6 +34,11 @@ dependencies {
     implementation("io.reactivex.rxjava2:rxjava:2.2.4")
     implementation("io.vavr:vavr:0.9.2")
     implementation("com.google.guava:guava:27.0.1-jre")
+
+//    implementation("org.graalvm.compiler:compiler:1.0.0-rc10") {
+//        setTransitive(false)
+//    }
+
     implementation("com.oracle.substratevm:svm:1.0.0-rc10") {
         setTransitive(false)
     }
@@ -56,7 +61,7 @@ graal {
     graalVersion("1.0.0-rc10")
     option("-H:+ReportUnsupportedElementsAtRuntime")
     option("-H:EnableURLProtocols=http")
-    option("-H:DynamicProxyConfigurationFiles=/home/sergej/IdeaProjects/proxies.json")
+    option("-H:DynamicProxyConfigurationFiles=/home/sergej/IdeaProjects/prototyping/graal/proxies.json")
 }
 
 configure<ByteBuddyExtension> {
