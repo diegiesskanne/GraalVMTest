@@ -1,6 +1,5 @@
 package de.eso.bytebuddy;
 
-import de.eso.annotation.Bind;
 import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.build.Plugin;
 import net.bytebuddy.description.method.MethodDescription;
@@ -14,10 +13,7 @@ import net.bytebuddy.pool.TypePool;
 
 import java.io.IOException;
 
-import static net.bytebuddy.matcher.ElementMatchers.anyOf;
-import static net.bytebuddy.matcher.ElementMatchers.isAnnotatedWith;
-
-public class HookInstallingPlugin implements Plugin {
+public class ILoggerPlugin implements Plugin {
   @Override
   public boolean matches(TypeDescription target) {
     return true;
@@ -32,9 +28,8 @@ public class HookInstallingPlugin implements Plugin {
     AsmVisitorWrapper.ForDeclaredMethods foo =
         new AsmVisitorWrapper.ForDeclaredMethods()
             .method(
-                isAnnotatedWith(anyOf(Bind.class)) //
-                    .and(ElementMatchers.named("wurst"))
-                    .and(ElementMatchers.returns(String.class)),
+                // go through all methods - dc
+                ElementMatchers.named("wurst"),
                 new AsmVisitorWrapper.ForDeclaredMethods.MethodVisitorWrapper() {
                   @Override
                   public MethodVisitor wrap(

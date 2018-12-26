@@ -67,6 +67,6 @@ graal {
 configure<ByteBuddyExtension> {
     transformation(closureOf<Transformation> {
         // setClassPath(configurations.getByName("implementation"))
-        plugin = "de.eso.bytebuddy.HookInstallingPlugin"
+        plugin = "de.eso.bytebuddy.ILoggerPlugin"
     })
 }
