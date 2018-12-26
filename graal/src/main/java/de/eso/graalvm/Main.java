@@ -8,6 +8,8 @@ import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,10 +37,13 @@ import java.util.Map;
  */
 public class Main {
   public static void main(String[] args) {
+    List<String> noop = new ArrayList<>();
+    System.out.println(noop);
+
     MyServiceImpl myService = new MyServiceImpl();
     myService.test("X");
 
-    Option<Class<?>> iLoggerClazz = myInterfaceClass("de.eso.api.ILogger");
+    Option<Class<?>> iLoggerClazz = forName("de.eso.api.ILogger");
     System.out.println(iLoggerClazz);
 
     Observable.fromIterable(Array.of(1, 2, 3))
@@ -49,7 +54,7 @@ public class Main {
 
     Map proxyInstance = Reflection.newProxy(Map.class, new DynamicInvocationHandlerGuavaImpl());
 
-    MyService service = createService(MyService.class);
+    MyService service = createProxyInterface(MyService.class);
     service.getTime().subscribe(aLong -> System.out.println("why is this working " + aLong));
 
     proxyInstance.put("hello", "world");
@@ -57,7 +62,7 @@ public class Main {
     System.out.println(hello);
 
     Option<Class<MyClazz>> myClazz =
-        myInterfaceClass("de.eso.graalvm.MyClazz").map(clazz -> (Class<MyClazz>) clazz);
+        forName("de.eso.graalvm.MyClazz").map(clazz -> (Class<MyClazz>) clazz);
     myClazz.forEach(
         myClazzClass -> {
           try {
@@ -68,7 +73,7 @@ public class Main {
           }
         });
 
-    Option<Class<?>> aClass = myInterfaceClass("de.eso.graalvm.MyInterface");
+    Option<Class<?>> aClass = forName("de.eso.graalvm.MyInterface");
     System.out.println(aClass.map(Class::getSimpleName).getOrElse("FAIL"));
     aClass
         .map(Class::getDeclaredMethods)
@@ -76,7 +81,7 @@ public class Main {
             methods -> Stream.of(methods).forEach(method -> System.out.println(method.getName())));
   }
 
-  private static <T> T createService(Class<T> interfaceType) {
+  private static <T> T createProxyInterface(Class<T> interfaceType) {
     Preconditions.checkArgument(interfaceType.isInterface(), "must be interface");
     T proxyInstance =
         (T)
@@ -87,7 +92,7 @@ public class Main {
     return proxyInstance;
   }
 
-  private static Option<Class<?>> myInterfaceClass(String s) {
+  private static Option<Class<?>> forName(String s) {
     Class<?> aClass = null;
     try {
       aClass = Class.forName(s);

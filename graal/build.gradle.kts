@@ -26,10 +26,6 @@ repositories {
 // val examplePlugin by configurations.creating
 
 dependencies {
-    project(":bytebuddy-agent").artifacts.forEach {
-        System.out.println(it.name)
-    }
-
     agent(files("/home/sergej/IdeaProjects/prototyping/bytebuddy-agent/build/libs/bytebuddy-agent.jar"))
 
     implementation(project(":annotation-api"))
