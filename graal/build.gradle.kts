@@ -4,6 +4,7 @@ import net.bytebuddy.build.gradle.ByteBuddyExtension
 import net.bytebuddy.build.gradle.Transformation
 
 plugins {
+    id("com.zoltu.application-agent") version "1.0.8"
     id("com.palantir.graal") version "0.2.0-13-gb76f6cb"
     application
 }
@@ -22,9 +23,15 @@ repositories {
     mavenCentral()
 }
 
-val examplePlugin by configurations.creating
+// val examplePlugin by configurations.creating
 
 dependencies {
+    project(":bytebuddy-agent").artifacts.forEach {
+        System.out.println(it.name)
+    }
+
+    agent(files("/home/sergej/IdeaProjects/prototyping/bytebuddy-agent/build/libs/bytebuddy-agent.jar"))
+
     implementation(project(":annotation-api"))
     implementation(project(":bytebuddy"))
 
@@ -69,4 +76,10 @@ configure<ByteBuddyExtension> {
         // setClassPath(configurations.getByName("implementation"))
         plugin = "de.eso.bytebuddy.ILoggerPlugin"
     })
+}
+
+applicationAgent {
+    applyToRun = true
+    applyToTests = false
+    applyToStartScripts = true
 }

@@ -35,6 +35,12 @@ import java.util.Map;
  */
 public class Main {
   public static void main(String[] args) {
+    MyServiceImpl myService = new MyServiceImpl();
+    myService.test("X");
+
+    Option<Class<?>> iLoggerClazz = myInterfaceClass("de.eso.api.ILogger");
+    System.out.println(iLoggerClazz);
+
     Observable.fromIterable(Array.of(1, 2, 3))
         .subscribe(integer -> System.out.println("obs$ " + integer));
 
