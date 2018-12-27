@@ -2,6 +2,9 @@ package de.eso.bytebuddy;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.ClassFileLocator;
+import net.bytebuddy.dynamic.loading.ClassInjector;
 import net.bytebuddy.matcher.ElementMatchers;
 
 import java.io.File;
@@ -9,6 +12,8 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -21,6 +26,8 @@ public final class BootstrapAgent {
   public static void premain(String arg, Instrumentation instrumentation) throws Exception {
     File tempFolder = Files.createTempDirectory("tmp").toFile();
 
+    // Writer.write(Writer.Type.CLASS_FOR_NAME, "FUG");
+
     AgentBuilder agentBuilder =
         new AgentBuilder.Default() //
             .disableClassFormatChanges() //
@@ -30,61 +37,53 @@ public final class BootstrapAgent {
             .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
             .enableBootstrapInjection(instrumentation, tempFolder);
 
-    // Class#forName
+    // Load Writer into Bootstrap-Classloader, in order to access it from @Advice
+    Map<TypeDescription.ForLoadedType, byte[]> forLoadedType = new HashMap<>();
+    forLoadedType.putIfAbsent(
+        new TypeDescription.ForLoadedType(Writer.class),
+        ClassFileLocator.ForClassLoader.read(Writer.class));
+    forLoadedType.putIfAbsent(
+        new TypeDescription.ForLoadedType(Writer.Type.class),
+        ClassFileLocator.ForClassLoader.read(Writer.Type.class));
+    ClassInjector.UsingInstrumentation.of(
+            tempFolder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
+        .inject(forLoadedType);
+
     agentBuilder
         .type(is(Class.class))
+        // Class#forName
         .transform(
             (builder, typeDescription, classLoader, module) ->
                 builder.visit(
                     Advice.to(ClassForNameInterceptor.class) //
                         .on(named("forName").and(ElementMatchers.takesArgument(0, String.class)))))
-        .installOn(instrumentation);
-
-    // Class#newInstance
-    agentBuilder
-        .type(is(Class.class))
+        // Class#newInstance
         .transform(
             (builder, typeDescription, classLoader, module) ->
                 builder.visit(
                     Advice.to(ClassNewInstance.class) //
                         .on(named("newInstance"))))
-        .installOn(instrumentation);
-
-    // Class#getDeclaredMethods
-    agentBuilder
-        .type(is(Class.class))
+        // Class#getDeclaredMethods
         .transform(
             (builder, typeDescription, classLoader, module) ->
                 builder.visit(
                     Advice.to(ClassGetDeclaredMethods.class) //
                         .on(named("getDeclaredMethods"))))
-        .installOn(instrumentation);
-
-    // Class#getDeclaredMethod(String name, Class<?>... parameterTypes)
-    agentBuilder
-        .type(is(Class.class))
+        // Class#getDeclaredMethod(String name, Class<?>... parameterTypes)
         .transform(
             (builder, typeDescription, classLoader, module) ->
                 builder.visit(
-                    Advice.to(ClassGetDeclaredMethod.class) //
+                    Advice.to(ClassGetDeclaredMethod.class)
                         .on(
                             named("getDeclaredMethod")
                                 .and(ElementMatchers.takesArgument(0, String.class)))))
-        .installOn(instrumentation);
-
-    // Class#getConstructors()
-    agentBuilder
-        .type(is(Class.class))
+        // Class#getConstructors()
         .transform(
             (builder, typeDescription, classLoader, module) ->
                 builder.visit(
                     Advice.to(ClassGetConstructors.class) //
                         .on(named("getConstructors"))))
-        .installOn(instrumentation);
-
-    // Class#getMethod(String name, Class<?>... parameterTypes)
-    agentBuilder
-        .type(is(Class.class))
+        // Class#getMethod(String name, Class<?>... parameterTypes)
         .transform(
             (builder, typeDescription, classLoader, module) ->
                 builder.visit(
@@ -92,59 +91,35 @@ public final class BootstrapAgent {
                         .on(
                             named("getMethod")
                                 .and(ElementMatchers.takesArgument(0, String.class)))))
-        .installOn(instrumentation);
-
-    // Class#getMethods()
-    agentBuilder
-        .type(is(Class.class))
+        // Class#getMethods()
+        .transform(
+            (builder, typeDescription, classLoader, module) ->
+                builder.visit(Advice.to(ClassGetMethods.class).on(named("getMethods"))))
+        // Class#getField(String s)
         .transform(
             (builder, typeDescription, classLoader, module) ->
                 builder.visit(
-                    Advice.to(ClassGetMethods.class) //
-                        .on(named("getMethods"))))
-        .installOn(instrumentation);
-
-    // Class#getField(String s)
-    agentBuilder
-        .type(is(Class.class))
-        .transform(
-            (builder, typeDescription, classLoader, module) ->
-                builder.visit(
-                    Advice.to(ClassGetField.class) //
+                    Advice.to(ClassGetField.class)
                         .on(
                             named("getField")
                                 .and(
                                     ElementMatchers.takesArgument(
                                         0, ElementMatchers.is(String.class))))))
-        .installOn(instrumentation);
-
-    // Class#getFields()
-    agentBuilder
-        .type(is(Class.class))
+        // Class#getFields()
         .transform(
             (builder, typeDescription, classLoader, module) ->
-                builder.visit(
-                    Advice.to(ClassGetFields.class) //
-                        .on(named("getFields"))))
-        .installOn(instrumentation);
-
-    // Class#getDeclaredFields()
-    agentBuilder
-        .type(is(Class.class))
+                builder.visit(Advice.to(ClassGetFields.class).on(named("getFields"))))
+        // Class#getDeclaredFields()
         .transform(
             (builder, typeDescription, classLoader, module) ->
                 builder.visit(
                     Advice.to(ClassGetDeclaredFields.class) //
                         .on(named("getDeclaredFields"))))
-        .installOn(instrumentation);
-
-    // Class#getDeclaredField(String s)
-    agentBuilder
-        .type(is(Class.class))
+        // Class#getDeclaredField(String s)
         .transform(
             (builder, typeDescription, classLoader, module) ->
                 builder.visit(
-                    Advice.to(ClassGetDeclaredField.class) //
+                    Advice.to(ClassGetDeclaredField.class)
                         .on(
                             named("getDeclaredField")
                                 .and(
@@ -182,7 +157,10 @@ public final class BootstrapAgent {
       // https://github.com/raphw/byte-buddy/issues/143
       // currently I do not know how to use outside variables. Any use from outside the static
       // method will result in an Error
-      System.out.println("Class#forName " + s);
+      // System.out.println("Class#forName " + s);
+      Writer.write(Writer.Type.CLASS_FOR_NAME, s);
+
+      // Writer.writeOut("X");
     }
   }
 
