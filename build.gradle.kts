@@ -9,7 +9,7 @@ subprojects {
     apply(plugin = "idea")
     idea {
         module {
-            setDownloadSources(true)
+            isDownloadSources = true
             setDownloadJavadoc(true)
         }
     }

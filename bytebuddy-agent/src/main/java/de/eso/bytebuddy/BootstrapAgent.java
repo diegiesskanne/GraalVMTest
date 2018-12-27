@@ -2,6 +2,7 @@ package de.eso.bytebuddy;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.matcher.ElementMatchers;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
@@ -29,7 +30,9 @@ public final class BootstrapAgent {
         .type(is(Class.class))
         .transform(
             (builder, typeDescription, classLoader, module) ->
-                builder.visit(Advice.to(ClassForNameInterceptor.class).on(named("forName"))))
+                builder.visit(
+                    Advice.to(ClassForNameInterceptor.class) //
+                        .on(named("forName").and(ElementMatchers.takesArgument(0, String.class)))))
         .installOn(instrumentation);
 
     agentBuilder
@@ -38,7 +41,9 @@ public final class BootstrapAgent {
             (builder, typeDescription, classLoader, module) ->
                 builder.visit(
                     Advice.to(ProxyNewProxyInstanceInterceptor.class)
-                        .on(named("newProxyInstance"))))
+                        .on(
+                            named("newProxyInstance")
+                                .and(ElementMatchers.takesGenericArgument(1, Class[].class)))))
         .installOn(instrumentation);
   }
 
@@ -59,7 +64,6 @@ public final class BootstrapAgent {
       // https://github.com/raphw/byte-buddy/issues/143
       // currently I do not know how to use outside variables. Any use from outside the static
       // method will result in an Error
-
       System.out.println("Class#forName " + s);
     }
   }
