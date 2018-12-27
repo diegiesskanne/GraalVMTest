@@ -66,6 +66,8 @@ graal {
     // option("-H:+AllowIncompleteClasspath")
     // Report usage of unsupported methods and fields at run time when they are accessed the first time, instead of as an error during image building
     // option("-H:+ReportUnsupportedElementsAtRuntime")
+    // When activating HTTPS -> image will be 10MiB be bigger in size.
+    // --enable-https
     // option("-H:EnableURLProtocols=https")
     option("-H:DynamicProxyConfigurationFiles=/home/sergej/IdeaProjects/prototyping/graal/proxies.json")
     option("--verbose")

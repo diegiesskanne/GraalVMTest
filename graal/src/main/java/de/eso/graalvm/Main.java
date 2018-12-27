@@ -7,6 +7,9 @@ import io.vavr.collection.Array;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
@@ -53,6 +56,18 @@ public class Main {
     System.out.println("CLAZZ NAME LOGGER " + simpleName);
 
     Map proxyInstance = Reflection.newProxy(Map.class, new DynamicInvocationHandlerGuavaImpl());
+
+    Class<Map> mapClass = Map.class;
+    Field[] mapClassFields = mapClass.getFields();
+    System.out.println(mapClassFields);
+    Constructor<?>[] mapClassConstructors = mapClass.getConstructors();
+    System.out.println(mapClassConstructors);
+    Method[] mapClassMethods = mapClass.getMethods();
+    System.out.println(mapClassMethods);
+    Field[] mapClassDeclaredFields = mapClass.getDeclaredFields();
+    System.out.println(mapClassDeclaredFields);
+    Method[] mapClassDeclaredMethods = mapClass.getDeclaredMethods();
+    System.out.println(mapClassDeclaredMethods);
 
     MyService service = createProxyInterface(MyService.class);
     service.getTime().subscribe(aLong -> System.out.println("why is this working " + aLong));
