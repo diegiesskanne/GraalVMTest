@@ -7,15 +7,19 @@ g# Created by .ignore support plugin (hsz.mobi)
 *.ipr
 *.iml
 out
-gen### Gradle template
+gen
+
+
+### Gradle template
 .gradle
 /build/
+*/build/*
+
 
 # Ignore Gradle GUI config
 gradle-app.setting
 
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
-!gradle-wrapper.jar
 !gradle/wrapper/
 
 # Cache of project
