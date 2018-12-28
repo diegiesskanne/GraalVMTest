@@ -1,6 +1,7 @@
 package de.eso.graalvm;
 
 import com.oracle.svm.core.annotate.AutomaticFeature;
+import de.eso.api.ILogger;
 import org.graalvm.nativeimage.Feature;
 import org.graalvm.nativeimage.RuntimeReflection;
 
@@ -14,6 +15,7 @@ import java.util.Map;
 public class RuntimeReflectionRegistrationFeature implements Feature {
   public void beforeAnalysis(BeforeAnalysisAccess access) {
     RuntimeReflection.register(Map.class);
+    RuntimeReflection.register(ILogger.class);
     RuntimeReflection.register(Map.class.getFields());
     RuntimeReflection.register(MyInterface.class);
     RuntimeReflection.register(MyClazz.class);

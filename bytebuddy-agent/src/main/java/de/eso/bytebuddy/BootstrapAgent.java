@@ -2,6 +2,7 @@ package de.eso.bytebuddy;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.asm.AsmVisitorWrapper;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.ClassFileLocator;
 import net.bytebuddy.dynamic.loading.ClassInjector;
@@ -22,11 +23,10 @@ import static net.bytebuddy.matcher.ElementMatchers.*;
  * ByteCode-Manipulation
  */
 public final class BootstrapAgent {
+  private BootstrapAgent() {}
 
   public static void premain(String arg, Instrumentation instrumentation) throws Exception {
     File tempFolder = Files.createTempDirectory("tmp").toFile();
-
-    // Writer.write(Writer.Type.CLASS_FOR_NAME, "FUG");
 
     AgentBuilder agentBuilder =
         new AgentBuilder.Default() //
@@ -45,6 +45,9 @@ public final class BootstrapAgent {
     forLoadedType.putIfAbsent(
         new TypeDescription.ForLoadedType(Writer.Type.class),
         ClassFileLocator.ForClassLoader.read(Writer.Type.class));
+    forLoadedType.putIfAbsent(
+        new TypeDescription.ForLoadedType(BootstrapAgent.class),
+        ClassFileLocator.ForClassLoader.read(BootstrapAgent.class));
     ClassInjector.UsingInstrumentation.of(
             tempFolder, ClassInjector.UsingInstrumentation.Target.BOOTSTRAP, instrumentation)
         .inject(forLoadedType);
@@ -54,9 +57,7 @@ public final class BootstrapAgent {
         // Class#forName
         .transform(
             (builder, typeDescription, classLoader, module) ->
-                builder.visit(
-                    Advice.to(ClassForNameInterceptor.class) //
-                        .on(named("forName").and(ElementMatchers.takesArgument(0, String.class)))))
+                builder.visit(createWrapper(ClassForNameInterceptor.class, "forName")))
         // Class#newInstance
         .transform(
             (builder, typeDescription, classLoader, module) ->
@@ -72,11 +73,7 @@ public final class BootstrapAgent {
         // Class#getDeclaredMethod(String name, Class<?>... parameterTypes)
         .transform(
             (builder, typeDescription, classLoader, module) ->
-                builder.visit(
-                    Advice.to(ClassGetDeclaredMethod.class)
-                        .on(
-                            named("getDeclaredMethod")
-                                .and(ElementMatchers.takesArgument(0, String.class)))))
+                builder.visit(createWrapper(ClassGetDeclaredMethod.class, "getDeclaredMethod")))
         // Class#getConstructors()
         .transform(
             (builder, typeDescription, classLoader, module) ->
@@ -86,11 +83,7 @@ public final class BootstrapAgent {
         // Class#getMethod(String name, Class<?>... parameterTypes)
         .transform(
             (builder, typeDescription, classLoader, module) ->
-                builder.visit(
-                    Advice.to(ClassGetMethod.class) //
-                        .on(
-                            named("getMethod")
-                                .and(ElementMatchers.takesArgument(0, String.class)))))
+                builder.visit(createWrapper(ClassGetMethod.class, "getMethod")))
         // Class#getMethods()
         .transform(
             (builder, typeDescription, classLoader, module) ->
@@ -98,13 +91,7 @@ public final class BootstrapAgent {
         // Class#getField(String s)
         .transform(
             (builder, typeDescription, classLoader, module) ->
-                builder.visit(
-                    Advice.to(ClassGetField.class)
-                        .on(
-                            named("getField")
-                                .and(
-                                    ElementMatchers.takesArgument(
-                                        0, ElementMatchers.is(String.class))))))
+                builder.visit(createWrapper(ClassGetField.class, "getField")))
         // Class#getFields()
         .transform(
             (builder, typeDescription, classLoader, module) ->
@@ -118,13 +105,7 @@ public final class BootstrapAgent {
         // Class#getDeclaredField(String s)
         .transform(
             (builder, typeDescription, classLoader, module) ->
-                builder.visit(
-                    Advice.to(ClassGetDeclaredField.class)
-                        .on(
-                            named("getDeclaredField")
-                                .and(
-                                    ElementMatchers.takesArgument(
-                                        0, ElementMatchers.is(String.class))))))
+                builder.visit(Advice.to(ClassGetDeclaredField.class).on(named("getDeclaredField"))))
         .installOn(instrumentation);
 
     // Proxy#newProxyInstance
@@ -138,6 +119,11 @@ public final class BootstrapAgent {
                             named("newProxyInstance")
                                 .and(ElementMatchers.takesGenericArgument(1, Class[].class)))))
         .installOn(instrumentation);
+  }
+
+  static AsmVisitorWrapper createWrapper(Class<?> adviceClass, String methodName) {
+    return Advice.to(adviceClass)
+        .on(named(methodName).and(ElementMatchers.takesArgument(0, String.class)));
   }
 
   /**
@@ -154,27 +140,21 @@ public final class BootstrapAgent {
   static class ClassForNameInterceptor {
     @Advice.OnMethodEnter
     static void intercept(@Advice.Argument(0) String s) {
-      // https://github.com/raphw/byte-buddy/issues/143
-      // currently I do not know how to use outside variables. Any use from outside the static
-      // method will result in an Error
-      // System.out.println("Class#forName " + s);
       Writer.write(Writer.Type.CLASS_FOR_NAME, s);
-
-      // Writer.writeOut("X");
     }
   }
 
   static class ClassNewInstance {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      System.out.println("Class#newInstance " + thiz.getCanonicalName());
+      Writer.write(Writer.Type.CLASS_NEW_INSTANCE, thiz.getCanonicalName());
     }
   }
 
   static class ClassGetDeclaredMethods {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      System.out.println("Class#getDeclaredMethods " + thiz.getCanonicalName());
+      Writer.write(Writer.Type.CLASS_GET_DECLARED_METHODS, thiz.getCanonicalName());
     }
   }
 
@@ -188,7 +168,7 @@ public final class BootstrapAgent {
   static class ClassGetFields {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      System.out.println("Class#getFields " + thiz.getCanonicalName());
+      Writer.write(Writer.Type.CLASS_GET_FIELDS, thiz.getCanonicalName());
     }
   }
 
@@ -209,21 +189,21 @@ public final class BootstrapAgent {
   static class ClassGetConstructors {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      System.out.println("Class#getConstructors " + thiz.getCanonicalName());
+      Writer.write(Writer.Type.CLASS_GET_CONSTRUCTORS, thiz.getCanonicalName());
     }
   }
 
   static class ClassGetMethods {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      System.out.println("Class#getMethods " + thiz.getCanonicalName());
+      Writer.write(Writer.Type.CLASS_GET_METHODS, thiz.getCanonicalName());
     }
   }
 
   static class ClassGetDeclaredFields {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      System.out.println("Class#getDeclaredFields " + thiz.getCanonicalName());
+      Writer.write(Writer.Type.CLASS_GET_DECLARED_FIELDS, thiz.getCanonicalName());
     }
   }
 

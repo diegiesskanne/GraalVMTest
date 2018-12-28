@@ -3,6 +3,7 @@ package de.eso.graalvm;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.Reflection;
 import io.reactivex.Observable;
+import io.reactivex.schedulers.Schedulers;
 import io.vavr.collection.Array;
 import io.vavr.collection.Stream;
 import io.vavr.control.Option;
@@ -11,8 +12,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,9 +39,6 @@ import java.util.Map;
  */
 public class Main {
   public static void main(String[] args) {
-    List<String> noop = new ArrayList<>();
-    System.out.println(noop);
-
     MyServiceImpl myService = new MyServiceImpl();
     myService.test("X");
 
@@ -51,6 +47,13 @@ public class Main {
 
     Observable.fromIterable(Array.of(1, 2, 3))
         .subscribe(integer -> System.out.println("obs$ " + integer));
+
+    Observable.fromArray(1, 2, 3)
+        .subscribeOn(Schedulers.computation())
+        .doOnNext(integer -> System.out.println(Thread.currentThread().getName() + "-" + integer))
+        .observeOn(Schedulers.io())
+        .doOnNext(integer -> System.out.println(Thread.currentThread().getName() + "-" + integer))
+        .blockingLast();
 
     String simpleName = Main.class.getSimpleName();
     System.out.println("CLAZZ NAME LOGGER " + simpleName);
