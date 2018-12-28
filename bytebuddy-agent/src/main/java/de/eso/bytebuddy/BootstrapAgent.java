@@ -13,6 +13,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.reflect.Proxy;
 import java.nio.file.Files;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,14 +38,21 @@ public final class BootstrapAgent {
             .with(AgentBuilder.TypeStrategy.Default.REDEFINE)
             .enableBootstrapInjection(instrumentation, tempFolder);
 
-    // Load Writer into Bootstrap-Classloader, in order to access it from @Advice
+    // Load ClassWriter into Bootstrap-Classloader, in order to access it from @Advice
     Map<TypeDescription.ForLoadedType, byte[]> forLoadedType = new HashMap<>();
+
     forLoadedType.putIfAbsent(
-        new TypeDescription.ForLoadedType(Writer.class),
-        ClassFileLocator.ForClassLoader.read(Writer.class));
+        new TypeDescription.ForLoadedType(EventType.class),
+        ClassFileLocator.ForClassLoader.read(EventType.class));
     forLoadedType.putIfAbsent(
-        new TypeDescription.ForLoadedType(Writer.Type.class),
-        ClassFileLocator.ForClassLoader.read(Writer.Type.class));
+        new TypeDescription.ForLoadedType(ClassEvent.class),
+        ClassFileLocator.ForClassLoader.read(ClassEvent.class));
+    forLoadedType.putIfAbsent(
+        new TypeDescription.ForLoadedType(ImmutableClassEvent.class),
+        ClassFileLocator.ForClassLoader.read(ImmutableClassEvent.class));
+    forLoadedType.putIfAbsent(
+        new TypeDescription.ForLoadedType(ClassWriter.class),
+        ClassFileLocator.ForClassLoader.read(ClassWriter.class));
     forLoadedType.putIfAbsent(
         new TypeDescription.ForLoadedType(BootstrapAgent.class),
         ClassFileLocator.ForClassLoader.read(BootstrapAgent.class));
@@ -108,7 +116,8 @@ public final class BootstrapAgent {
                 builder.visit(Advice.to(ClassGetDeclaredField.class).on(named("getDeclaredField"))))
         .installOn(instrumentation);
 
-    // Proxy#newProxyInstance
+    // Proxy#newProxyInstance -- Object newProxyInstance(ClassLoader loader, Class<?>[] interfaces,
+    // InvocationHandler h)
     agentBuilder
         .type(is(Proxy.class))
         .transform(
@@ -126,10 +135,6 @@ public final class BootstrapAgent {
         .on(named(methodName).and(ElementMatchers.takesArgument(0, String.class)));
   }
 
-  /**
-   * public static Object newProxyInstance(ClassLoader loader, Class<?>[] interfaces,
-   * InvocationHandler h)
-   */
   static class ProxyNewProxyInstanceInterceptor {
     @Advice.OnMethodEnter
     static void intercept(@Advice.Argument(1) Class<?>[] interfaces) {
@@ -140,77 +145,110 @@ public final class BootstrapAgent {
   static class ClassForNameInterceptor {
     @Advice.OnMethodEnter
     static void intercept(@Advice.Argument(0) String s) {
-      Writer.write(Writer.Type.CLASS_FOR_NAME, s);
+      ClassEvent build = ImmutableClassEvent.build(EventType.CLASS_FOR_NAME, s);
+      ClassWriter.write(build);
     }
   }
 
   static class ClassNewInstance {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      Writer.write(Writer.Type.CLASS_NEW_INSTANCE, thiz.getCanonicalName());
+      ClassEvent build =
+          ImmutableClassEvent.build(EventType.CLASS_NEW_INSTANCE, thiz.getCanonicalName());
+      ClassWriter.write(build);
     }
   }
 
   static class ClassGetDeclaredMethods {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      Writer.write(Writer.Type.CLASS_GET_DECLARED_METHODS, thiz.getCanonicalName());
+      ClassEvent build =
+          ImmutableClassEvent.build(EventType.CLASS_GET_DECLARED_METHODS, thiz.getCanonicalName());
+      ClassWriter.write(build);
     }
   }
 
   static class ClassGetField {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz, @Advice.Argument(0) String fieldName) {
-      System.out.println("Class#getField " + thiz.getCanonicalName() + "#" + fieldName);
+      ClassEvent build =
+          ImmutableClassEvent.buildFieldNames(
+              EventType.CLASS_GET_FIELD,
+              thiz.getCanonicalName(),
+              Collections.singletonList(fieldName));
+      ClassWriter.write(build);
     }
   }
 
   static class ClassGetFields {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      Writer.write(Writer.Type.CLASS_GET_FIELDS, thiz.getCanonicalName());
+      ClassEvent build =
+          ImmutableClassEvent.build(EventType.CLASS_GET_FIELDS, thiz.getCanonicalName());
+      ClassWriter.write(build);
     }
   }
 
   static class ClassGetDeclaredMethod {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz, @Advice.Argument(0) String methodName) {
-      System.out.println("Class#getDeclaredMethod " + thiz.getCanonicalName() + "#" + methodName);
+      ClassEvent build =
+          ImmutableClassEvent.buildMethodNames(
+              EventType.CLASS_GET_DECLARED_METHOD,
+              thiz.getCanonicalName(),
+              Collections.singletonList(methodName));
+      ClassWriter.write(build);
     }
   }
 
   static class ClassGetMethod {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz, @Advice.Argument(0) String methodName) {
-      System.out.println("Class#getMethod " + thiz.getCanonicalName() + "#" + methodName);
+      ClassEvent build =
+          ImmutableClassEvent.buildMethodNames(
+              EventType.CLASS_GET_METHOD,
+              thiz.getCanonicalName(),
+              Collections.singletonList(methodName));
+      ClassWriter.write(build);
     }
   }
 
   static class ClassGetConstructors {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      Writer.write(Writer.Type.CLASS_GET_CONSTRUCTORS, thiz.getCanonicalName());
+      ClassEvent build =
+          ImmutableClassEvent.build(EventType.CLASS_GET_CONSTRUCTORS, thiz.getCanonicalName());
+      ClassWriter.write(build);
     }
   }
 
   static class ClassGetMethods {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      Writer.write(Writer.Type.CLASS_GET_METHODS, thiz.getCanonicalName());
+      ClassEvent build =
+          ImmutableClassEvent.build(EventType.CLASS_GET_METHODS, thiz.getCanonicalName());
+      ClassWriter.write(build);
     }
   }
 
   static class ClassGetDeclaredFields {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz) {
-      Writer.write(Writer.Type.CLASS_GET_DECLARED_FIELDS, thiz.getCanonicalName());
+      ClassEvent build =
+          ImmutableClassEvent.build(EventType.CLASS_GET_DECLARED_FIELDS, thiz.getCanonicalName());
+      ClassWriter.write(build);
     }
   }
 
   static class ClassGetDeclaredField {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz, @Advice.Argument(0) String methodName) {
-      System.out.println("Class#getDeclaredField " + thiz.getCanonicalName() + "#" + methodName);
+      ClassEvent build =
+          ImmutableClassEvent.buildMethodNames(
+              EventType.CLASS_GET_DECLARED_FIELD,
+              thiz.getCanonicalName(),
+              Collections.singletonList(methodName));
+      ClassWriter.write(build);
     }
   }
 }
