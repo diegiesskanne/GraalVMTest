@@ -42,6 +42,14 @@ public class Main {
     MyServiceImpl myService = new MyServiceImpl();
     myService.test("X");
 
+    Class<MyServiceImpl> myServiceClass = MyServiceImpl.class;
+    Field[] myServiceImplFields = myServiceClass.getFields();
+    Constructor<?>[] constructors = myServiceClass.getConstructors();
+    Method[] myServiceClassMethods = myServiceClass.getMethods();
+    System.out.println(myServiceImplFields);
+    System.out.println(constructors);
+    System.out.println(myServiceClassMethods);
+
     Option<Class<?>> iLoggerClazz = forName("de.eso.api.ILogger");
     System.out.println(iLoggerClazz);
 

@@ -57,11 +57,12 @@ public final class ImmutableClassEvent implements ClassEvent {
   }
 
   private static void writeArray(String fName, List<?> list, StringBuffer buffer) {
-    buffer.append("\"" + fName + "\":");
-    buffer.append(
-        "["
-            + list.stream().map(eT -> "\"" + eT.toString() + "\"").collect(Collectors.joining(", "))
-            + "]");
+    buffer.append("\"").append(fName).append("\":");
+    buffer
+        .append("[")
+        .append(
+            list.stream().map(eT -> "\"" + eT.toString() + "\"").collect(Collectors.joining(", ")))
+        .append("]");
   }
 
   @Override
@@ -85,18 +86,21 @@ public final class ImmutableClassEvent implements ClassEvent {
   }
 
   @Override
+  public int hashCode() {
+    return 1;
+  }
+
+  @Override
   public boolean equals(Object obj) {
-    if (this == obj) {
-      return true;
-    } else if (obj instanceof ClassEvent) {
-      ClassEvent classEventObj = (ClassEvent) obj;
-      return classEventObj.className().equals(className)
-          && classEventObj.eventTypes() == classEventObj.eventTypes()
-          && classEventObj.fieldNames().equals(fieldNames)
-          && classEventObj.methodNames().equals(methodNames);
-    } else {
-      return false;
-    }
+    if (obj == null) return false;
+    if (obj == this) return true;
+    if (!(obj instanceof ImmutableClassEvent)) return false;
+
+    ImmutableClassEvent classEventObj = (ImmutableClassEvent) obj;
+    return classEventObj.className().equals(className)
+        && classEventObj.eventTypes().equals(eventTypes)
+        && classEventObj.fieldNames().equals(fieldNames)
+        && classEventObj.methodNames().equals(methodNames);
   }
 
   @Override

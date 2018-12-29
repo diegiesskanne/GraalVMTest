@@ -10,12 +10,12 @@ import net.bytebuddy.matcher.ElementMatchers;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -116,8 +116,7 @@ public final class BootstrapAgent {
                 builder.visit(Advice.to(ClassGetDeclaredField.class).on(named("getDeclaredField"))))
         .installOn(instrumentation);
 
-    // Proxy#newProxyInstance -- Object newProxyInstance(ClassLoader loader, Class<?>[] interfaces,
-    // InvocationHandler h)
+    // Proxy#newProxyInstance -- Object newProxyInstance(ClassLoader, Class<?>[], InvocationHandler)
     agentBuilder
         .type(is(Proxy.class))
         .transform(
@@ -144,15 +143,15 @@ public final class BootstrapAgent {
 
   static class ClassForNameInterceptor {
     @Advice.OnMethodEnter
-    static void intercept(@Advice.Argument(0) String s) {
-      ClassEvent build = ImmutableClassEvent.build(EventType.CLASS_FOR_NAME, s);
+    static void onEnter(@Advice.Argument(0) String className) {
+      ClassEvent build = ImmutableClassEvent.build(EventType.CLASS_FOR_NAME, className);
       ClassWriter.write(build);
     }
   }
 
   static class ClassNewInstance {
     @Advice.OnMethodEnter
-    static void intercept(@Advice.This Class<?> thiz) {
+    static void onEnter(@Advice.This Class<?> thiz) {
       ClassEvent build =
           ImmutableClassEvent.build(EventType.CLASS_NEW_INSTANCE, thiz.getCanonicalName());
       ClassWriter.write(build);
@@ -160,8 +159,10 @@ public final class BootstrapAgent {
   }
 
   static class ClassGetDeclaredMethods {
-    @Advice.OnMethodEnter
-    static void intercept(@Advice.This Class<?> thiz) {
+    @Advice.OnMethodExit
+    static void onExit(@Advice.This Class<?> thiz) {
+      //      List<String> declaredMethods =
+      //          Arrays.stream(methods).map(Method::getName).collect(Collectors.toList());
       ClassEvent build =
           ImmutableClassEvent.build(EventType.CLASS_GET_DECLARED_METHODS, thiz.getCanonicalName());
       ClassWriter.write(build);
@@ -170,7 +171,7 @@ public final class BootstrapAgent {
 
   static class ClassGetField {
     @Advice.OnMethodEnter
-    static void intercept(@Advice.This Class<?> thiz, @Advice.Argument(0) String fieldName) {
+    static void onEnter(@Advice.This Class<?> thiz, @Advice.Argument(0) String fieldName) {
       ClassEvent build =
           ImmutableClassEvent.buildFieldNames(
               EventType.CLASS_GET_FIELD,
@@ -181,17 +182,20 @@ public final class BootstrapAgent {
   }
 
   static class ClassGetFields {
-    @Advice.OnMethodEnter
-    static void intercept(@Advice.This Class<?> thiz) {
+    @Advice.OnMethodExit
+    static void onExit(@Advice.This Class<?> thiz, @Advice.Return Field[] fields) {
+      List<String> fieldNames =
+          Arrays.stream(fields).map(Field::getName).collect(Collectors.toList());
       ClassEvent build =
-          ImmutableClassEvent.build(EventType.CLASS_GET_FIELDS, thiz.getCanonicalName());
+          ImmutableClassEvent.buildFieldNames(
+              EventType.CLASS_GET_FIELDS, thiz.getCanonicalName(), fieldNames);
       ClassWriter.write(build);
     }
   }
 
   static class ClassGetDeclaredMethod {
     @Advice.OnMethodEnter
-    static void intercept(@Advice.This Class<?> thiz, @Advice.Argument(0) String methodName) {
+    static void onEnter(@Advice.This Class<?> thiz, @Advice.Argument(0) String methodName) {
       ClassEvent build =
           ImmutableClassEvent.buildMethodNames(
               EventType.CLASS_GET_DECLARED_METHOD,
@@ -214,26 +218,32 @@ public final class BootstrapAgent {
   }
 
   static class ClassGetConstructors {
-    @Advice.OnMethodEnter
-    static void intercept(@Advice.This Class<?> thiz) {
+    @Advice.OnMethodExit
+    static void onExit(@Advice.This Class<?> thiz, @Advice.Return Executable[] executables) {
+      List<String> methodNames =
+          Arrays.stream(executables).map(Executable::getName).collect(Collectors.toList());
       ClassEvent build =
-          ImmutableClassEvent.build(EventType.CLASS_GET_CONSTRUCTORS, thiz.getCanonicalName());
+          ImmutableClassEvent.buildMethodNames(
+              EventType.CLASS_GET_CONSTRUCTORS, thiz.getCanonicalName(), methodNames);
       ClassWriter.write(build);
     }
   }
 
   static class ClassGetMethods {
-    @Advice.OnMethodEnter
-    static void intercept(@Advice.This Class<?> thiz) {
+    @Advice.OnMethodExit
+    static void onExit(@Advice.This Class<?> thiz, @Advice.Return Executable[] methods) {
+      List<String> methodNames =
+          Arrays.stream(methods).map(Executable::getName).collect(Collectors.toList());
       ClassEvent build =
-          ImmutableClassEvent.build(EventType.CLASS_GET_METHODS, thiz.getCanonicalName());
+          ImmutableClassEvent.buildMethodNames(
+              EventType.CLASS_GET_METHODS, thiz.getCanonicalName(), methodNames);
       ClassWriter.write(build);
     }
   }
 
   static class ClassGetDeclaredFields {
-    @Advice.OnMethodEnter
-    static void intercept(@Advice.This Class<?> thiz) {
+    @Advice.OnMethodExit
+    static void onExit(@Advice.This Class<?> thiz) {
       ClassEvent build =
           ImmutableClassEvent.build(EventType.CLASS_GET_DECLARED_FIELDS, thiz.getCanonicalName());
       ClassWriter.write(build);
@@ -242,7 +252,7 @@ public final class BootstrapAgent {
 
   static class ClassGetDeclaredField {
     @Advice.OnMethodEnter
-    static void intercept(@Advice.This Class<?> thiz, @Advice.Argument(0) String methodName) {
+    static void onEnter(@Advice.This Class<?> thiz, @Advice.Argument(0) String methodName) {
       ClassEvent build =
           ImmutableClassEvent.buildMethodNames(
               EventType.CLASS_GET_DECLARED_FIELD,

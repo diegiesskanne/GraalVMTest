@@ -1,9 +1,7 @@
 package de.eso.bytebuddy;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +14,7 @@ import java.util.stream.Collectors;
  * Bootstrap-Classloader and not Application-Classloader
  */
 public final class ClassWriter {
-  private static Map<String, ClassEvent> classEvents = new HashMap<>();
+  private static List<ClassEvent> classEvents = new ArrayList<>();
 
   // yep! nothing to see here
   static {
@@ -52,39 +50,14 @@ public final class ClassWriter {
         || className.contains("net.bytebuddy")) {
       return;
     }
-    classEvents.compute(
-        className,
-        (cName, currentValue) -> {
-          if (currentValue == null) {
-            return classEvent;
-          } else {
-            List<EventType> distinctEventTypes =
-                copyDistinct(currentValue.eventTypes(), classEvent.eventTypes());
-            List<String> distinctFieldNames =
-                copyDistinct(currentValue.fieldNames(), classEvent.fieldNames());
-            List<String> distinctMethodNames =
-                copyDistinct(currentValue.methodNames(), classEvent.methodNames());
-
-            return ImmutableClassEvent.build(
-                className, distinctEventTypes, distinctFieldNames, distinctMethodNames);
-          }
-        });
+    ClassWriter.classEvents.add(classEvent);
   }
 
   /** DO NOT FUCKING CHANGE THE VISIBILITY OF THIS METHOD */
   public static void writeOut(String fileName) {
+    List<ClassEvent> classEvents = new ArrayList<>(ClassWriter.classEvents);
     String collect =
-        classEvents.values().stream().map(ClassEvent::toString).collect(Collectors.joining("\n"));
+        classEvents.stream().distinct().map(ClassEvent::toString).collect(Collectors.joining("\n"));
     System.out.println(collect);
-  }
-
-  @SafeVarargs
-  private static <T> List<T> copyDistinct(List<T> current, List<T>... appending) {
-    List<T> copy = new ArrayList<>(current);
-    for (List<T> app : appending) {
-      copy.addAll(app);
-    }
-    List<T> distinct = copy.stream().distinct().collect(Collectors.toList());
-    return distinct;
   }
 }

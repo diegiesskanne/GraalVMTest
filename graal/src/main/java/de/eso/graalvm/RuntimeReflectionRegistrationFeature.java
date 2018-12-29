@@ -15,6 +15,9 @@ import java.util.Map;
 public class RuntimeReflectionRegistrationFeature implements Feature {
   public void beforeAnalysis(BeforeAnalysisAccess access) {
     RuntimeReflection.register(Map.class);
+    RuntimeReflection.register(MyServiceImpl.class);
+    RuntimeReflection.register(MyServiceImpl.class.getFields());
+    RuntimeReflection.register(MyServiceImpl.class.getDeclaredFields());
     RuntimeReflection.register(ILogger.class);
     RuntimeReflection.register(Map.class.getFields());
     RuntimeReflection.register(MyInterface.class);
