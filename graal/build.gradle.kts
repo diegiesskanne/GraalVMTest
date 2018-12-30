@@ -26,6 +26,8 @@ repositories {
 // val examplePlugin by configurations.creating
 
 dependencies {
+    implementation("com.squareup:javapoet:1.11.1")
+
     agent(files("/home/sergej/IdeaProjects/prototyping/bytebuddy-agent/build/libs/bytebuddy-agent.jar"))
 
     implementation(project(":annotation-api"))
@@ -65,7 +67,6 @@ graal {
     // When activating HTTPS -> image will be 10MiB be bigger in size.
     // --enable-https
     // option("-H:EnableURLProtocols=https")
-    option("-H:DynamicProxyConfigurationFiles=/home/sergej/IdeaProjects/prototyping/graal/proxies.json")
     option("--verbose")
     option("--no-server")
 }

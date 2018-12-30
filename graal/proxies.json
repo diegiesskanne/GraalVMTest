@@ -1,9 +1,0 @@
-[
-  [
-    "java.util.Map"
-  ],
-  [
-    "de.eso.graalvm.MyService",
-    "de.eso.graalvm.ProxyHandle"
-  ]
-]
