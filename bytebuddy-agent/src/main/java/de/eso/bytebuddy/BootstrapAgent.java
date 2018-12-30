@@ -51,6 +51,9 @@ public final class BootstrapAgent {
         new TypeDescription.ForLoadedType(ImmutableClassEvent.class),
         ClassFileLocator.ForClassLoader.read(ImmutableClassEvent.class));
     forLoadedType.putIfAbsent(
+        new TypeDescription.ForLoadedType(ImmutableClassEvent.Builder.class),
+        ClassFileLocator.ForClassLoader.read(ImmutableClassEvent.Builder.class));
+    forLoadedType.putIfAbsent(
         new TypeDescription.ForLoadedType(ClassWriter.class),
         ClassFileLocator.ForClassLoader.read(ClassWriter.class));
     forLoadedType.putIfAbsent(
@@ -144,7 +147,7 @@ public final class BootstrapAgent {
   static class ClassForNameInterceptor {
     @Advice.OnMethodEnter
     static void onEnter(@Advice.Argument(0) String className) {
-      ClassEvent build = ImmutableClassEvent.build(EventType.CLASS_FOR_NAME, className);
+      ClassEvent build = ClassEvent.build(EventType.CLASS_FOR_NAME, className);
       ClassWriter.write(build);
     }
   }
@@ -152,8 +155,7 @@ public final class BootstrapAgent {
   static class ClassNewInstance {
     @Advice.OnMethodEnter
     static void onEnter(@Advice.This Class<?> thiz) {
-      ClassEvent build =
-          ImmutableClassEvent.build(EventType.CLASS_NEW_INSTANCE, thiz.getCanonicalName());
+      ClassEvent build = ClassEvent.build(EventType.CLASS_NEW_INSTANCE, thiz.getCanonicalName());
       ClassWriter.write(build);
     }
   }
@@ -164,7 +166,7 @@ public final class BootstrapAgent {
       //      List<String> declaredMethods =
       //          Arrays.stream(methods).map(Method::getName).collect(Collectors.toList());
       ClassEvent build =
-          ImmutableClassEvent.build(EventType.CLASS_GET_DECLARED_METHODS, thiz.getCanonicalName());
+          ClassEvent.build(EventType.CLASS_GET_DECLARED_METHODS, thiz.getCanonicalName());
       ClassWriter.write(build);
     }
   }
@@ -173,7 +175,7 @@ public final class BootstrapAgent {
     @Advice.OnMethodEnter
     static void onEnter(@Advice.This Class<?> thiz, @Advice.Argument(0) String fieldName) {
       ClassEvent build =
-          ImmutableClassEvent.buildFieldNames(
+          ClassEvent.buildFieldNames(
               EventType.CLASS_GET_FIELD,
               thiz.getCanonicalName(),
               Collections.singletonList(fieldName));
@@ -187,7 +189,7 @@ public final class BootstrapAgent {
       List<String> fieldNames =
           Arrays.stream(fields).map(Field::getName).collect(Collectors.toList());
       ClassEvent build =
-          ImmutableClassEvent.buildFieldNames(
+          ClassEvent.buildFieldNames(
               EventType.CLASS_GET_FIELDS, thiz.getCanonicalName(), fieldNames);
       ClassWriter.write(build);
     }
@@ -197,7 +199,7 @@ public final class BootstrapAgent {
     @Advice.OnMethodEnter
     static void onEnter(@Advice.This Class<?> thiz, @Advice.Argument(0) String methodName) {
       ClassEvent build =
-          ImmutableClassEvent.buildMethodNames(
+          ClassEvent.buildMethodNames(
               EventType.CLASS_GET_DECLARED_METHOD,
               thiz.getCanonicalName(),
               Collections.singletonList(methodName));
@@ -209,7 +211,7 @@ public final class BootstrapAgent {
     @Advice.OnMethodEnter
     static void intercept(@Advice.This Class<?> thiz, @Advice.Argument(0) String methodName) {
       ClassEvent build =
-          ImmutableClassEvent.buildMethodNames(
+          ClassEvent.buildMethodNames(
               EventType.CLASS_GET_METHOD,
               thiz.getCanonicalName(),
               Collections.singletonList(methodName));
@@ -223,7 +225,7 @@ public final class BootstrapAgent {
       List<String> methodNames =
           Arrays.stream(executables).map(Executable::getName).collect(Collectors.toList());
       ClassEvent build =
-          ImmutableClassEvent.buildMethodNames(
+          ClassEvent.buildMethodNames(
               EventType.CLASS_GET_CONSTRUCTORS, thiz.getCanonicalName(), methodNames);
       ClassWriter.write(build);
     }
@@ -235,7 +237,7 @@ public final class BootstrapAgent {
       List<String> methodNames =
           Arrays.stream(methods).map(Executable::getName).collect(Collectors.toList());
       ClassEvent build =
-          ImmutableClassEvent.buildMethodNames(
+          ClassEvent.buildMethodNames(
               EventType.CLASS_GET_METHODS, thiz.getCanonicalName(), methodNames);
       ClassWriter.write(build);
     }
@@ -245,7 +247,7 @@ public final class BootstrapAgent {
     @Advice.OnMethodExit
     static void onExit(@Advice.This Class<?> thiz) {
       ClassEvent build =
-          ImmutableClassEvent.build(EventType.CLASS_GET_DECLARED_FIELDS, thiz.getCanonicalName());
+          ClassEvent.build(EventType.CLASS_GET_DECLARED_FIELDS, thiz.getCanonicalName());
       ClassWriter.write(build);
     }
   }
@@ -254,7 +256,7 @@ public final class BootstrapAgent {
     @Advice.OnMethodEnter
     static void onEnter(@Advice.This Class<?> thiz, @Advice.Argument(0) String methodName) {
       ClassEvent build =
-          ImmutableClassEvent.buildMethodNames(
+          ClassEvent.buildMethodNames(
               EventType.CLASS_GET_DECLARED_FIELD,
               thiz.getCanonicalName(),
               Collections.singletonList(methodName));

@@ -50,10 +50,6 @@ dependencies {
     }
 }
 
-configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-}
-
 application {
     mainClassName = "de.eso.graalvm.Main"
 }
