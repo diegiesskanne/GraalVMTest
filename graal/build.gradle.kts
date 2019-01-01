@@ -58,18 +58,22 @@ application {
 }
 
 graal {
-    mainClass("de.eso.graalvm.Main")
     outputName("hello-world")
     graalVersion("1.0.0-rc10")
     // Allow image building with an incomplete class path: report type resolution errors at run time when they are accessed the first time, instead of during image building
     // option("-H:+AllowIncompleteClasspath")
     // Report usage of unsupported methods and fields at run time when they are accessed the first time, instead of as an error during image building
+    // option("-JIsProduct=false")
     option("-H:+ReportUnsupportedElementsAtRuntime")
     // When activating HTTPS -> image will be 10MiB be bigger in size.
     // --enable-https
     // option("-H:EnableURLProtocols=https")
+
+    // set IsProduct-System-Property while image-gen
+    option("-DIsProduct=true")
     option("--verbose")
     option("--no-server")
+    mainClass("de.eso.graalvm.Main")
 }
 
 //configure<ByteBuddyExtension> {
@@ -79,8 +83,8 @@ graal {
 //    })
 //}
 
-applicationAgent {
-    applyToRun = true
-    applyToTests = false
-    applyToStartScripts = true
-}
+//applicationAgent {
+//    applyToRun = true
+//    applyToTests = false
+//    applyToStartScripts = true
+//}

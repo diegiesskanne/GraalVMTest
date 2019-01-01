@@ -8,7 +8,7 @@ import org.graalvm.nativeimage.ImageSingletons;
 import java.util.Map;
 
 @AutomaticFeature
-final class RuntimeDynamicProxyRegistrationFeature implements Feature {
+final class DynamicProxyRegistrationFeature implements Feature {
   @Override
   public void beforeAnalysis(BeforeAnalysisAccess access) {
     DynamicProxyRegistry lookup = ImageSingletons.lookup(DynamicProxyRegistry.class);

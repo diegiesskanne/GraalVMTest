@@ -3,6 +3,7 @@ package de.eso.graalvm;
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.Reflection;
 import de.eso.api.ProxyHandle;
+import de.eso.dsi.DSIOnlineBase;
 import de.eso.dsi.DSIOnlineListener;
 import de.eso.dsi.DSIWLANListener;
 import io.reactivex.Observable;
@@ -19,14 +20,6 @@ import java.util.Map;
 
 /**
  * TODO's:
- *
- * <p>1. Dynamic-Proxy ---
- *
- * <p>Create Class from Providers with @AutomaticFeature: {@link
- * RuntimeDynamicProxyRegistrationFeature}
- *
- * <p>--> All DSIs and Public-Service-Interfaces (? extends DSIListener; Public interface +
- * ProxyHandle (Provider); Public-interface + ProxyHandle (Client)
  *
  * <p>2. Reflection ---
  *
@@ -80,9 +73,17 @@ public class Main {
         Reflection.newProxy(DSIWLANListener.class, new DynamicInvocationHandlerGuavaImpl());
     DSIOnlineListener dsiOnlineListener =
         Reflection.newProxy(DSIOnlineListener.class, new DynamicInvocationHandlerGuavaImpl());
-
     dsiwlanListener.responseSetWpsKeypadPin(666);
     dsiOnlineListener.updateRole(42, 42);
+
+    DSIOnlineBase dsiOnlineBase =
+        Reflection.newProxy(DSIOnlineBase.class, new DynamicInvocationHandlerGuavaImpl());
+    dsiOnlineBase.test();
+
+    ServiceBuilderImpl.create() //
+        .serviceImpl(MyServiceImpl.class)
+        .asPublicApi(MyService.class)
+        .build();
 
     Class<Map> mapClass = Map.class;
     Field[] mapClassFields = mapClass.getFields();

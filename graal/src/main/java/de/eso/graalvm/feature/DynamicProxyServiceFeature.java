@@ -9,8 +9,13 @@ import org.graalvm.nativeimage.ImageSingletons;
 
 import java.util.List;
 
+/**
+ * Register all interfaces from classes, which implement the {@link de.eso.api.Service} interface
+ *
+ * <p>TODO: possibly public OSGi services are missing for ClientProxy
+ */
 @AutomaticFeature
-final class ServiceFeature implements Feature {
+final class DynamicProxyServiceFeature implements Feature {
   @Override
   public void beforeAnalysis(BeforeAnalysisAccess beforeAnalysisAccess) {
     DynamicProxyRegistry lookup = ImageSingletons.lookup(DynamicProxyRegistry.class);

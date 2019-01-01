@@ -1,27 +1,24 @@
 package de.eso.graalvm.feature;
 
-import com.oracle.svm.core.annotate.AutomaticFeature;
 import com.oracle.svm.core.jdk.proxy.DynamicProxyRegistry;
 import com.oracle.svm.hosted.FeatureImpl;
+import io.vavr.collection.Array;
 import org.graalvm.nativeimage.Feature;
 import org.graalvm.nativeimage.ImageSingletons;
 
-/** Register all {@code ? extends DSIListener}-interfaces for Proxy-usage */
-@AutomaticFeature
-final class DSIListenerFeature implements Feature {
+abstract class AbstractDynamicProxyDSIBaseFeature implements Feature {
+  abstract String className();
+
   @Override
   public void beforeAnalysis(BeforeAnalysisAccess beforeAnalysisAccess) {
     DynamicProxyRegistry lookup = ImageSingletons.lookup(DynamicProxyRegistry.class);
-
     FeatureImpl.BeforeAnalysisAccessImpl access =
         (FeatureImpl.BeforeAnalysisAccessImpl) beforeAnalysisAccess;
 
-    Class<?> dsiListenerInterface = access.findClassByName("de.eso.api.DSIListener");
-    access
-        .findSubclasses(dsiListenerInterface)
-        .forEach(
-            aClass -> {
-              lookup.addProxyClass(aClass);
-            });
+    Class<?> dsiListenerInterface = access.findClassByName(className());
+    Array.ofAll(access.findSubclasses(dsiListenerInterface))
+        // only register interfaces
+        .filter(Class::isInterface)
+        .forEach(lookup::addProxyClass);
   }
 }
