@@ -26,6 +26,8 @@ repositories {
 // val examplePlugin by configurations.creating
 
 dependencies {
+    implementation(files("/home/sergej/.gradle/caches/com.palantir.graal/1.0.0-rc10/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/jvmci-api.jar"))
+
     implementation("com.squareup:javapoet:1.11.1")
 
     agent(files("/home/sergej/IdeaProjects/prototyping/bytebuddy-agent/build/libs/bytebuddy-agent.jar"))
@@ -40,10 +42,9 @@ dependencies {
     implementation("io.vavr:vavr:0.9.2")
     implementation("com.google.guava:guava:27.0.1-jre")
 
-//    implementation("org.graalvm.compiler:compiler:1.0.0-rc10") {
-//        setTransitive(false)
-//    }
-
+    implementation("org.graalvm.compiler:compiler:1.0.0-rc10") {
+        setTransitive(false)
+    }
     implementation("com.oracle.substratevm:svm:1.0.0-rc10") {
         setTransitive(false)
     }
@@ -71,12 +72,12 @@ graal {
     option("--no-server")
 }
 
-configure<ByteBuddyExtension> {
-    transformation(closureOf<Transformation> {
-        // setClassPath(configurations.getByName("implementation"))
-        plugin = "de.eso.bytebuddy.ILoggerPlugin"
-    })
-}
+//configure<ByteBuddyExtension> {
+//    transformation(closureOf<Transformation> {
+//        // setClassPath(configurations.getByName("implementation"))
+//        plugin = "de.eso.bytebuddy.ILoggerPlugin"
+//    })
+//}
 
 applicationAgent {
     applyToRun = true

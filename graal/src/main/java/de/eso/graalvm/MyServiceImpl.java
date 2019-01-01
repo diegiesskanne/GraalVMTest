@@ -1,6 +1,9 @@
 package de.eso.graalvm;
 
-public class MyServiceImpl implements Service {
+import de.eso.api.Service;
+import io.reactivex.Observable;
+
+public final class MyServiceImpl implements MyService, Service {
   public final String publicString = "LMS";
 
   void test(String s) {
@@ -12,4 +15,9 @@ public class MyServiceImpl implements Service {
 
   @Override
   public void stop() {}
+
+  @Override
+  public Observable<Long> getTime() {
+    return null;
+  }
 }

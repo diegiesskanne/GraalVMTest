@@ -31,7 +31,7 @@ public final class GraalDSIListenerDynamicProxyJsonGenerator {
             .enableAllInfo() // Scan classes, methods, fields, annotations
             .whitelistPackages(pkg) // Scan com.xyz and subpackages (omit to scan all packages)
             .scan()) { // Start the scan
-      return scanResult.getClassesImplementing("de.eso.dsi.DSIListener");
+      return scanResult.getClassesImplementing("de.eso.api.DSIListener");
     }
   }
 }

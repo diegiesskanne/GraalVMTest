@@ -1,4 +1,4 @@
-package de.eso.graalvm;
+package de.eso.api;
 
 public interface Service {
   default void start() {}

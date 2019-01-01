@@ -2,6 +2,9 @@ package de.eso.graalvm;
 
 import com.google.common.base.Preconditions;
 import com.google.common.reflect.Reflection;
+import de.eso.api.ProxyHandle;
+import de.eso.dsi.DSIOnlineListener;
+import de.eso.dsi.DSIWLANListener;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.Schedulers;
 import io.vavr.collection.Array;
@@ -17,17 +20,18 @@ import java.util.Map;
 /**
  * TODO's:
  *
- * <p>1. Dynamic-Proxy:
+ * <p>1. Dynamic-Proxy ---
  *
- * <p>- create -H:DynamicProxyConfigurationFiles JSON -> contains all classes which must be proxied!
+ * <p>Create Class from Providers with @AutomaticFeature: {@link
+ * RuntimeDynamicProxyRegistrationFeature}
  *
  * <p>--> All DSIs and Public-Service-Interfaces (? extends DSIListener; Public interface +
  * ProxyHandle (Provider); Public-interface + ProxyHandle (Client)
  *
- * <p>2. Reflection
+ * <p>2. Reflection ---
  *
- * <p>- create @AutomaticFeature class implementing Feature (e.g. {@link
- * RuntimeReflectionRegistrationFeature}) via Annotation-Processing + Classpath-Scanning
+ * <p>- Create Class from Providers with @AutomaticFeature: {@link
+ * RuntimeReflectionRegistrationFeature}
  *
  * <p>- Pitfalls:
  *
@@ -41,6 +45,10 @@ public class Main {
   public static void main(String[] args) {
     MyServiceImpl myService = new MyServiceImpl();
     myService.test("X");
+
+    LoggerImpl logger = new LoggerImpl();
+    logger.debug("debug");
+    logger.info("info");
 
     Class<MyServiceImpl> myServiceClass = MyServiceImpl.class;
     Field[] myServiceImplFields = myServiceClass.getFields();
@@ -67,6 +75,14 @@ public class Main {
     System.out.println("CLAZZ NAME LOGGER " + simpleName);
 
     Map proxyInstance = Reflection.newProxy(Map.class, new DynamicInvocationHandlerGuavaImpl());
+
+    DSIWLANListener dsiwlanListener =
+        Reflection.newProxy(DSIWLANListener.class, new DynamicInvocationHandlerGuavaImpl());
+    DSIOnlineListener dsiOnlineListener =
+        Reflection.newProxy(DSIOnlineListener.class, new DynamicInvocationHandlerGuavaImpl());
+
+    dsiwlanListener.responseSetWpsKeypadPin(666);
+    dsiOnlineListener.updateRole(42, 42);
 
     Class<Map> mapClass = Map.class;
     Field[] mapClassFields = mapClass.getFields();
@@ -109,13 +125,11 @@ public class Main {
 
   private static <T> T createProxyInterface(Class<T> interfaceType) {
     Preconditions.checkArgument(interfaceType.isInterface(), "must be interface");
-    T proxyInstance =
-        (T)
-            Proxy.newProxyInstance(
-                Main.class.getClassLoader(),
-                new Class[] {interfaceType, ProxyHandle.class},
-                new DynamicInvocationHandlerGuavaObs());
-    return proxyInstance;
+    return (T)
+        Proxy.newProxyInstance(
+            Main.class.getClassLoader(),
+            new Class[] {interfaceType, ProxyHandle.class},
+            new DynamicInvocationHandlerGuavaObs());
   }
 
   private static Option<Class<?>> forName(String s) {
