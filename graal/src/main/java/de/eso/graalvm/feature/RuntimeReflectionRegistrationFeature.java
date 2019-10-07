@@ -5,19 +5,15 @@ import de.eso.api.ILogger;
 import de.eso.graalvm.MyClazz;
 import de.eso.graalvm.MyInterface;
 import de.eso.graalvm.MyServiceImpl;
-import org.graalvm.nativeimage.Feature;
-import org.graalvm.nativeimage.RuntimeReflection;
-
 import java.util.Map;
+import org.graalvm.nativeimage.hosted.Feature;
+import org.graalvm.nativeimage.hosted.RuntimeReflection;
 
-/**
- * This class must be generated with a Annotation-Processor, which scans all files in the classpath
- * and searches for certain patterns
- */
+/** This class must be generated with a Annotation-Processor, which scans all files in the classpath and searches for certain patterns */
 @AutomaticFeature
 final class RuntimeReflectionRegistrationFeature implements Feature {
   @Override
-  public void beforeAnalysis(BeforeAnalysisAccess access) {
+  public void beforeAnalysis(Feature.BeforeAnalysisAccess access) {
     try {
       RuntimeReflection.register(Map.class);
       RuntimeReflection.register(MyServiceImpl.class);

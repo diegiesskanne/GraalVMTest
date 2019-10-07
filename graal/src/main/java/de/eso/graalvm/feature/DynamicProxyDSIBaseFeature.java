@@ -1,7 +1,7 @@
 package de.eso.graalvm.feature;
 
 import com.oracle.svm.core.annotate.AutomaticFeature;
-import org.graalvm.nativeimage.Feature;
+import org.graalvm.nativeimage.hosted.Feature;
 
 /**
  * Registers all interfaces extending {@code ? extends DSIBase}-interface.
@@ -9,8 +9,7 @@ import org.graalvm.nativeimage.Feature;
  * <p>TODO: Only register, when native-generation is for "Product"-usage (ServiceAdminSimProxy)
  */
 @AutomaticFeature
-final class DynamicProxyDSIBaseFeature extends AbstractDynamicProxyDSIBaseFeature
-    implements Feature {
+final class DynamicProxyDSIBaseFeature extends AbstractDynamicProxyDSIBaseFeature implements Feature {
 
   @Override
   String className() {

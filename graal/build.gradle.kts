@@ -1,11 +1,6 @@
-import groovy.lang.Closure
-import net.bytebuddy.build.gradle.AbstractUserConfiguration
-import net.bytebuddy.build.gradle.ByteBuddyExtension
-import net.bytebuddy.build.gradle.Transformation
-
 plugins {
     id("com.zoltu.application-agent") version "1.0.8"
-    id("com.palantir.graal") version "0.2.0-13-gb76f6cb"
+    id("com.palantir.graal") version "0.6.0-14-g6fa0c0a"
     application
 }
 
@@ -26,11 +21,11 @@ repositories {
 // val examplePlugin by configurations.creating
 
 dependencies {
-    implementation(files("/home/sergej/.gradle/caches/com.palantir.graal/1.0.0-rc10/graalvm-ce-1.0.0-rc10/jre/lib/jvmci/jvmci-api.jar"))
+    implementation(files("C:\\Users\\<<user>>\\.gradle\\caches\\com.palantir.graal\\19.2.0\\graalvm-ce-19.2.0\\jre\\lib\\jvmci\\jvmci-api.jar"))
 
     implementation("com.squareup:javapoet:1.11.1")
 
-    agent(files("/home/sergej/IdeaProjects/prototyping/bytebuddy-agent/build/libs/bytebuddy-agent.jar"))
+    // agent(files("/home/sergej/IdeaProjects/prototyping/bytebuddy-agent/build/libs/bytebuddy-agent.jar"))
 
     implementation(project(":annotation-api"))
     implementation(project(":bytebuddy"))
@@ -42,13 +37,16 @@ dependencies {
     implementation("io.vavr:vavr:0.9.2")
     implementation("com.google.guava:guava:27.0.1-jre")
 
-    implementation("org.graalvm.compiler:compiler:1.0.0-rc10") {
+    // implementation 'org.graalvm.compiler:compiler:19.2.0.1'
+    implementation("org.graalvm.compiler:compiler:19.2.0") {
         setTransitive(false)
     }
-    implementation("com.oracle.substratevm:svm:1.0.0-rc10") {
+    // implementation 'com.oracle.substratevm:svm:19.2.0.1'
+    implementation("com.oracle.substratevm:svm:19.2.0") {
         setTransitive(false)
     }
-    implementation("org.graalvm.sdk:graal-sdk:1.0.0-rc10") {
+    // implementation 'org.graalvm.sdk:graal-sdk:19.2.0.1'
+    implementation("org.graalvm.sdk:graal-sdk:19.2.0") {
         setTransitive(false)
     }
 }
@@ -59,7 +57,7 @@ application {
 
 graal {
     outputName("hello-world")
-    graalVersion("1.0.0-rc10")
+    graalVersion("19.2.0")
     // Allow image building with an incomplete class path: report type resolution errors at run time when they are accessed the first time, instead of during image building
     // option("-H:+AllowIncompleteClasspath")
     // Report usage of unsupported methods and fields at run time when they are accessed the first time, instead of as an error during image building
@@ -72,7 +70,7 @@ graal {
     // set IsProduct-System-Property while image-gen
     option("-DIsProduct=true")
     option("--verbose")
-    option("--no-server")
+    // option("--no-server")
     mainClass("de.eso.graalvm.Main")
 }
 

@@ -4,10 +4,9 @@ import com.oracle.svm.core.annotate.AutomaticFeature;
 import com.oracle.svm.core.jdk.proxy.DynamicProxyRegistry;
 import com.oracle.svm.hosted.FeatureImpl;
 import io.vavr.collection.Array;
-import org.graalvm.nativeimage.Feature;
-import org.graalvm.nativeimage.ImageSingletons;
-
 import java.util.List;
+import org.graalvm.nativeimage.ImageSingletons;
+import org.graalvm.nativeimage.hosted.Feature;
 
 /**
  * Register all interfaces from classes, which implement the {@link de.eso.api.Service} interface
@@ -19,8 +18,7 @@ final class DynamicProxyServiceFeature implements Feature {
   @Override
   public void beforeAnalysis(BeforeAnalysisAccess beforeAnalysisAccess) {
     DynamicProxyRegistry lookup = ImageSingletons.lookup(DynamicProxyRegistry.class);
-    FeatureImpl.BeforeAnalysisAccessImpl access =
-        (FeatureImpl.BeforeAnalysisAccessImpl) beforeAnalysisAccess;
+    FeatureImpl.BeforeAnalysisAccessImpl access = (FeatureImpl.BeforeAnalysisAccessImpl) beforeAnalysisAccess;
 
     Class<?> proxyHandle = access.findClassByName("de.eso.api.ProxyHandle");
     Class<?> serviceInterface = access.findClassByName("de.eso.api.Service");

@@ -2,10 +2,9 @@ package de.eso.graalvm.feature;
 
 import com.oracle.svm.core.annotate.AutomaticFeature;
 import com.oracle.svm.core.jdk.proxy.DynamicProxyRegistry;
-import org.graalvm.nativeimage.Feature;
-import org.graalvm.nativeimage.ImageSingletons;
-
 import java.util.Map;
+import org.graalvm.nativeimage.ImageSingletons;
+import org.graalvm.nativeimage.hosted.Feature;
 
 @AutomaticFeature
 final class DynamicProxyRegistrationFeature implements Feature {

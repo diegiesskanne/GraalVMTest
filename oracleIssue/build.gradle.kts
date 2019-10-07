@@ -1,5 +1,5 @@
 plugins {
-    id("com.palantir.graal") version "0.2.0-13-gb76f6cb"
+    id("com.palantir.graal") version "0.6.0-14-g6fa0c0a"
     application
 }
 
@@ -20,14 +20,14 @@ application {
     mainClassName = "TopTen"
 }
 
-tasks.compileJava {
-    options.setFork(true)
-    options.fork(Pair("executable", "/home/sergej/.gradle/caches/com.palantir.graal/1.0.0-rc10/graalvm-ce-1.0.0-rc10/bin/javac"))
-}
+//tasks.compileJava {
+//    options.setFork(true)
+//    options.fork(Pair("executable", "/home/sergej/.gradle/caches/com.palantir.graal/1.0.0-rc10/graalvm-ce-1.0.0-rc10/bin/javac"))
+//}
 
 graal {
     outputName("hello-world")
-    graalVersion("1.0.0-rc10")
+    graalVersion("19.2.0")
 
     // option("-H:+UseStackBasePointer")
     // option("-H:+ReportUnsupportedElementsAtRuntime")
@@ -38,6 +38,6 @@ graal {
     // option("-R:+VerboseGC")
 
     option("--verbose")
-    option("--no-server")
+    // option("--no-server")
     mainClass("TopTen")
 }
