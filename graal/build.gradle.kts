@@ -21,7 +21,7 @@ repositories {
 // val examplePlugin by configurations.creating
 
 dependencies {
-    implementation(files("C:\\Users\\<<user>>\\.gradle\\caches\\com.palantir.graal\\19.2.0\\graalvm-ce-19.2.0\\jre\\lib\\jvmci\\jvmci-api.jar"))
+    implementation(files("/Users/jaromirvogt/.gradle/caches/com.palantir.graal/19.2.0/graalvm-ce-19.2.0/Contents/Home/jre/lib/jvmci/jvmci-api.jar"))
 
     implementation("com.squareup:javapoet:1.11.1")
 
@@ -66,10 +66,11 @@ graal {
     // When activating HTTPS -> image will be 10MiB be bigger in size.
     // --enable-https
     // option("-H:EnableURLProtocols=https")
-
+    option("--initialize-at-build-time=de.eso.api.DSIListener,de.eso.dsi.DSIWLANListener,de.eso.dsi.DSIOnlineListener,io.vavr.Value,io.vavr.Lambda,io.vavr.collection.Seq,io.vavr.collection.Iterator,io.vavr.collection.AbstractIterator,io.vavr.Function1,io.vavr.collection.Traversable,io.vavr.collection.IndexedSeq,io.vavr.collection.Collections,io.vavr.collection.Array,io.vavr.collection.Foldable,de.eso.graalvm.MyService,io.vavr.collection.Array$1,de.eso.dsi.DSIOnlineBase,de.eso.api.ProxyHandle")
     // set IsProduct-System-Property while image-gen
     option("-DIsProduct=true")
     option("--verbose")
+    option("-H:+TraceClassInitialization")
     // option("--no-server")
     mainClass("de.eso.graalvm.Main")
 }
