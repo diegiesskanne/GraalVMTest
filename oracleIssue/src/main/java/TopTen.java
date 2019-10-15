@@ -25,6 +25,8 @@ public class TopTen {
         .sorted((a, b) -> -a.getValue().compareTo(b.getValue()))
         .limit(10)
         .forEach(e -> System.out.format("%s = %d%n", e.getKey(), e.getValue()));
+        
+	Class instance = Reflect.class;
   }
 
   private static String replace(String word) {
@@ -40,4 +42,16 @@ public class TopTen {
       throw new RuntimeException(e);
     }
   }
+}
+
+public class Reflect{
+	
+	public static int[] testarray;
+	
+	public void doStuff(int a){
+	
+		testarray[0] = a
+		
+	}
+	
 }

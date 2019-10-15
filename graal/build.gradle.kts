@@ -1,5 +1,5 @@
 plugins {
-    id("com.zoltu.application-agent") version "1.0.8"
+    //id("com.zoltu.application-agent") version "1.0.8"
     id("com.palantir.graal") version "0.6.0-14-g6fa0c0a"
     application
 }
@@ -21,11 +21,11 @@ repositories {
 // val examplePlugin by configurations.creating
 
 dependencies {
-    implementation(files("/Users/jaromirvogt/.gradle/caches/com.palantir.graal/19.2.0/graalvm-ce-19.2.0/Contents/Home/jre/lib/jvmci/jvmci-api.jar"))
+    implementation(files("/home/javo6129/.gradle/caches/com.palantir.graal/19.2.0/graalvm-ce-19.2.0/jre/lib/jvmci/jvmci-api.jar"))
 
     implementation("com.squareup:javapoet:1.11.1")
 
-    // agent(files("/home/sergej/IdeaProjects/prototyping/bytebuddy-agent/build/libs/bytebuddy-agent.jar"))
+    //agent(files("/home/sergej/IdeaProjects/prototyping/bytebuddy-agent/build/libs/bytebuddy-agent.jar"))
 
     implementation(project(":annotation-api"))
     implementation(project(":bytebuddy"))
@@ -62,15 +62,16 @@ graal {
     // option("-H:+AllowIncompleteClasspath")
     // Report usage of unsupported methods and fields at run time when they are accessed the first time, instead of as an error during image building
     // option("-JIsProduct=false")
-    option("-H:+ReportUnsupportedElementsAtRuntime")
+    //option("-H:+ReportUnsupportedElementsAtRuntime")
     // When activating HTTPS -> image will be 10MiB be bigger in size.
     // --enable-https
     // option("-H:EnableURLProtocols=https")
-    option("--initialize-at-build-time=de.eso.api.DSIListener,de.eso.dsi.DSIWLANListener,de.eso.dsi.DSIOnlineListener,io.vavr.Value,io.vavr.Lambda,io.vavr.collection.Seq,io.vavr.collection.Iterator,io.vavr.collection.AbstractIterator,io.vavr.Function1,io.vavr.collection.Traversable,io.vavr.collection.IndexedSeq,io.vavr.collection.Collections,io.vavr.collection.Array,io.vavr.collection.Foldable,de.eso.graalvm.MyService,io.vavr.collection.Array$1,de.eso.dsi.DSIOnlineBase,de.eso.api.ProxyHandle")
+    //option("--initialize-at-build-time=de.eso.api.DSIListener,de.eso.dsi.DSIWLANListener,de.eso.dsi.DSIOnlineListener,io.vavr.Value,io.vavr.Lambda,io.vavr.collection.Seq,io.vavr.collection.Iterator,io.vavr.collection.AbstractIterator,io.vavr.Function1,io.vavr.collection.Traversable,io.vavr.collection.IndexedSeq,io.vavr.collection.Collections,io.vavr.collection.Array,io.vavr.collection.Foldable,de.eso.graalvm.MyService,io.vavr.collection.Array$1,de.eso.dsi.DSIOnlineBase,de.eso.api.ProxyHandle")
     // set IsProduct-System-Property while image-gen
-    option("-DIsProduct=true")
-    option("--verbose")
+    //option("-DIsProduct=true")
+    //option("--verbose")
     option("-H:+TraceClassInitialization")
+    option("-agentlib:native-image-agent=config-output-dir=/home/javo6129/Desktop/jaroskram/GraalVMTest/graal/META-INF/native-image")
     // option("--no-server")
     mainClass("de.eso.graalvm.Main")
 }

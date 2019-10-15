@@ -9,6 +9,10 @@ public final class MyServiceImpl implements MyService, Service {
   void test(String s) {
     System.out.println("MyServiceImpl#test " + s);
   }
+  
+  public void testMethod(int a){
+	  int b = a + 1;
+  }
 
   @Override
   public void start() {}

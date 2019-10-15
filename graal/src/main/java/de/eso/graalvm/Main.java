@@ -47,6 +47,8 @@ public class Main {
     Field[] myServiceImplFields = myServiceClass.getFields();
     Constructor<?>[] constructors = myServiceClass.getConstructors();
     Method[] myServiceClassMethods = myServiceClass.getMethods();
+   //int c = myServiceClassMethods.length();
+   // System.out.println(c);
     System.out.println(myServiceImplFields);
     System.out.println(constructors);
     System.out.println(myServiceClassMethods);
