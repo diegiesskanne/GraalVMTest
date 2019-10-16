@@ -1,7 +1,7 @@
 plugins {
     //id("com.zoltu.application-agent") version "1.0.8"
     id("com.palantir.graal") version "0.6.0-14-g6fa0c0a"
-    application
+    //application
 }
 
 buildscript {
@@ -51,9 +51,9 @@ dependencies {
     }
 }
 
-application {
+/*application {
     mainClassName = "de.eso.graalvm.Main"
-}
+}*/
 
 graal {
     outputName("hello-world")
@@ -70,11 +70,22 @@ graal {
     // set IsProduct-System-Property while image-gen
     //option("-DIsProduct=true")
     //option("--verbose")
+
     option("-H:+TraceClassInitialization")
     option("-agentlib:native-image-agent=config-output-dir=/home/javo6129/Desktop/jaroskram/GraalVMTest/graal/META-INF/native-image")
     // option("--no-server")
     mainClass("de.eso.graalvm.Main")
+
 }
+
+//tasks.create<JavaExec>("someTask") {
+//    val cacheDir: Property<Path> = project.objects.property(Path::class.java)
+//    cacheDir.get()
+//            .resolve(Paths.get(graalVersion.get(), "graalvm-ce-" + graalVersion.get()))
+//            .resolve(getArchitectureSpecifiedBinaryPath())
+//            .toFile()
+//            .getAbsolutePath();
+//}
 
 //configure<ByteBuddyExtension> {
 //    transformation(closureOf<Transformation> {
@@ -88,3 +99,4 @@ graal {
 //    applyToTests = false
 //    applyToStartScripts = true
 //}
+
